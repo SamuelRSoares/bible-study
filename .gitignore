@@ -1,0 +1,24 @@
+node_modules/
+
+# Raw extracted text (large, regenerable from PDFs)
+raw-text*.json
+sample-output.txt
+sample-commentary.txt
+
+# Intermediate commentary files (regenerable)
+commentary.json
+commentary-compact.json
+commentary-ot.json
+commentary-ot-compact.json
+commentary-fmt.json
+commentary-nt-fmt.json
+commentary-ot-fmt.json
+
+# Bible source files (downloaded, regenerable)
+bibles/
+
+# Generated app data (regenerable from scripts)
+public/data/
+
+# User notes (personal data, backup separately)
+notes/
