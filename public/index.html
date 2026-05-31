@@ -105,6 +105,22 @@
 
     .intro-btn:hover { background: var(--accent-glow); }
 
+    .bookmark-btn, .bookmark-go {
+      background: transparent; border: 1px solid var(--border); color: var(--text-secondary);
+      padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;
+      white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;
+    }
+
+    .bookmark-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+    .bookmark-go {
+      border-color: var(--accent-dim); color: var(--accent);
+    }
+
+    .bookmark-go:hover { background: var(--accent-glow); }
+
+    .bookmark-btn.saved { border-color: var(--green); color: var(--green); }
+
     /* Sidebar */
     .sidebar {
       width: 220px; background: var(--sidebar-bg); border-right: 1px solid var(--border);
@@ -146,12 +162,28 @@
 
     /* Flowing text - verses inline */
     .section-header {
-      font-size: 14px; font-weight: 600; color: var(--mauve);
-      margin: 22px 0 10px; padding: 6px 12px;
+      margin: 22px 0 10px; padding: 8px 12px;
       background: rgba(123, 94, 167, 0.06);
       border-left: 3px solid var(--mauve); border-radius: 0 4px 4px 0;
       display: block;
     }
+
+    .section-header .section-ref {
+      font-size: 11px; font-weight: 700; color: var(--accent);
+      background: var(--accent-glow); padding: 1px 7px; border-radius: 3px;
+      margin-right: 8px; vertical-align: middle; white-space: nowrap;
+    }
+
+    .section-header .section-title {
+      font-size: 14px; font-weight: 600; color: var(--mauve); vertical-align: middle;
+    }
+
+    .section-header .section-intro {
+      font-size: 13px; line-height: 1.7; color: var(--text-secondary); margin-top: 8px;
+    }
+
+    .section-header .section-intro b { color: var(--text-primary); font-weight: 600; }
+    .section-header .section-intro i { color: var(--mauve); font-style: italic; }
 
     .verse-flow {
       line-height: 1.9; font-size: 16px; color: var(--text-primary);
@@ -221,13 +253,41 @@
       margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border);
     }
 
+    /* Verse pager (prev / next navigation in the side panel) */
+    .verse-pager {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+    }
+
+    .verse-pager .pager-ref {
+      flex: 1; text-align: center; font-size: 12px; font-weight: 700; color: var(--mauve);
+    }
+
+    .pager-btn {
+      width: 30px; height: 28px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: transparent; border: 1px solid var(--border); border-radius: 4px;
+      color: var(--text-secondary); cursor: pointer; font-size: 18px; line-height: 1;
+      transition: all 0.12s;
+    }
+
+    .pager-btn:hover:not(:disabled) {
+      background: var(--accent-glow); color: var(--accent); border-color: var(--accent-dim);
+    }
+
+    .pager-btn:disabled { opacity: 0.3; cursor: default; }
+
+    .commentary-range-note {
+      font-size: 11px; color: var(--text-muted); font-style: italic; margin-bottom: 8px;
+    }
+
     .no-commentary { color: var(--text-muted); font-style: italic; font-size: 13px; }
 
-    /* Rich text editor */
+    /* Rich text editor (Obsidian-style: open writing surface, no boxed frame) */
     .editor-toolbar {
-      display: flex; gap: 2px; padding: 6px 8px; background: var(--bg-surface);
-      border: 1px solid var(--border); border-bottom: none;
-      border-radius: var(--radius) var(--radius) 0 0; flex-wrap: wrap;
+      display: flex; gap: 2px; padding: 0 0 8px; background: transparent;
+      border: none; border-bottom: 1px solid var(--border);
+      margin-bottom: 10px; flex-wrap: wrap;
     }
 
     .editor-toolbar button {
@@ -251,14 +311,12 @@
 
     .note-editor {
       width: 100%; flex: 1; min-height: 180px;
-      background: var(--bg-surface); color: var(--text-primary);
-      border: 1px solid var(--border); border-top: none;
-      border-radius: 0 0 var(--radius) var(--radius);
-      padding: 12px; font-size: 14px; line-height: 1.7;
+      background: transparent; color: var(--text-primary);
+      border: none; border-radius: 0;
+      padding: 0; font-size: 15px; line-height: 1.8;
       font-family: inherit; outline: none; overflow-y: auto;
     }
 
-    .note-editor:focus { border-color: var(--accent); }
     .note-editor:empty::before {
       content: attr(data-placeholder); color: var(--text-muted); font-style: italic;
     }
@@ -369,7 +427,7 @@
       bookIdx: 0, chapter: 1, translation: 'NAA',
       selectedVerse: null, sideTab: 'commentary',
       notes: {}, sidebarOpen: true, sidePanelOpen: true,
-      sidePanelWidth: 420,
+      sidePanelWidth: 420, bookmark: null,
     };
 
     try {
@@ -458,6 +516,10 @@
       const bookName = book.name;
       const groups = getBookGroups();
       const panelW = state.sidePanelOpen ? state.sidePanelWidth : 0;
+      const bm = state.bookmark;
+      const bmLabel = bm && DATA.books[bm.bookIdx]
+        ? `${DATA.books[bm.bookIdx].namePt} ${bm.chapter}${bm.verse ? ':' + bm.verse : ''}`
+        : '';
 
       document.getElementById('app').innerHTML = `
         <div class="header">
@@ -472,6 +534,8 @@
               ${book.chapters.map((_, i) => `<option value="${i + 1}" ${i + 1 === state.chapter ? 'selected' : ''}>Cap. ${i + 1}</option>`).join('')}
             </select>
             ${DATA.introductions[bookName] ? `<button class="intro-btn" onclick="showIntro()">Intro</button>` : ''}
+            <button class="bookmark-btn" onclick="setBookmark()" title="Marcar onde parei na leitura">\u{1F516} Marcar</button>
+            ${bm ? `<button class="bookmark-go" onclick="goToBookmark()" title="Voltar para onde parei">↩ ${bmLabel}</button>` : ''}
           </div>
           <div class="translation-tabs">
             ${DATA.translations.map(t => `<button class="translation-tab ${state.translation === t ? 'active' : ''}" onclick="selectTranslation('${t}')">${t}</button>`).join('')}
@@ -535,13 +599,21 @@
       if (!ch) return '<p class="no-commentary">Capitulo nao encontrado.</p>';
 
       const sections = DATA.sectionHeaders[bookName]?.[state.chapter] || {};
-      const sectionRefs = Object.entries(sections);
-      // Map: verse number -> section header
+      // Map: verse number -> section header { ref, title, intro }
+      // Values may be a plain string (OT) or { title, intro } (NT).
       const sectionMap = {};
-      for (const [sRef, title] of sectionRefs) {
+      for (const [sRef, val] of Object.entries(sections)) {
         const startVerse = parseInt(sRef.split(':')[1]);
-        sectionMap[startVerse] = title;
+        const title = typeof val === 'string' ? val : (val.title || '');
+        const intro = typeof val === 'string' ? '' : (val.intro || '');
+        sectionMap[startVerse] = { ref: sRef, title, intro };
       }
+
+      // When the selected verse belongs to a multi-verse commentary range,
+      // highlight every verse in that range (they all share one commentary),
+      // so the selection doesn't look like each verse has its own note.
+      const selectedVerse = state.selectedVerse ? ch.verses[state.selectedVerse - 1] : null;
+      const activeRange = selectedVerse?.commentaryRange || null;
 
       let html = '<div class="verse-flow">';
 
@@ -549,14 +621,20 @@
         const v = ch.verses[i];
         const vNum = v.number;
 
-        // Insert section header (breaks the flow)
+        // Insert section header (breaks the flow): verse range, title, intro
         if (sectionMap[vNum]) {
-          html += `</div><div class="section-header">${sectionMap[vNum]}</div><div class="verse-flow">`;
+          const s = sectionMap[vNum];
+          html += `</div><div class="section-header">` +
+            `<span class="section-ref">${s.ref}</span>` +
+            `<span class="section-title">${s.title}</span>` +
+            (s.intro ? `<div class="section-intro">${s.intro}</div>` : '') +
+            `</div><div class="verse-flow">`;
         }
 
         const hasComm = v.commentary || v.commentaryRange;
         const hasNote = state.notes[vNum] && state.notes[vNum].trim();
-        const isActive = state.selectedVerse === vNum;
+        const isActive = state.selectedVerse === vNum ||
+          (activeRange && v.commentaryRange === activeRange);
 
         let cls = 'verse-span';
         if (hasComm && hasNote) cls += ' has-both';
@@ -575,28 +653,37 @@
 
     function renderSidePanel(ch, book) {
       if (!state.selectedVerse) {
-        return '<p class="no-commentary">Clique em um versiculo para ver o comentario.</p>';
+        return '<p class="no-commentary">Clique em um versiculo para ver o comentario. Use as setas ‹ › (ou ↑ ↓ no teclado) para navegar.</p>';
       }
 
       const v = ch?.verses[state.selectedVerse - 1];
       if (!v) return '';
 
+      // Prev/next pager — one click moves to the adjacent verse (also Arrow Up/Down).
+      const isFirst = state.chapter === 1 && state.selectedVerse === 1;
+      const isLast = state.chapter === book.chapters.length && state.selectedVerse === ch.verses.length;
+      const pager = `
+        <div class="verse-pager">
+          <button class="pager-btn" onclick="navigateVerse(-1)" ${isFirst ? 'disabled' : ''} title="Versiculo anterior (↑)">‹</button>
+          <span class="pager-ref">${book.namePt} ${state.chapter}:${state.selectedVerse}</span>
+          <button class="pager-btn" onclick="navigateVerse(1)" ${isLast ? 'disabled' : ''} title="Proximo versiculo (↓)">›</button>
+        </div>`;
+
       if (state.sideTab === 'commentary') {
         const comm = getCommentary(state.chapter, state.selectedVerse);
         if (comm) {
-          return `
-            <div class="commentary-ref">${book.namePt} ${comm.ref}</div>
-            <div class="commentary-text">${comm.text}</div>
-          `;
+          const rangeNote = comm.ref && comm.ref !== `${state.chapter}:${state.selectedVerse}`
+            ? `<div class="commentary-range-note">Comentario de ${book.namePt} ${comm.ref}</div>`
+            : '';
+          return pager + rangeNote + `<div class="commentary-text">${comm.text}</div>`;
         }
-        return '<p class="no-commentary">Sem comentario disponivel para este versiculo.</p>';
+        return pager + '<p class="no-commentary">Sem comentario disponivel para este versiculo.</p>';
       }
 
       if (state.sideTab === 'notes') {
         const noteContent = state.notes[state.selectedVerse] || '';
-        return `
+        return pager + `
           <div class="note-wrapper">
-            <div class="commentary-ref">${book.namePt} ${state.chapter}:${state.selectedVerse}</div>
             <div class="editor-toolbar" id="editor-toolbar">
               <button onmousedown="execFmt(event,'bold')" title="Negrito (Ctrl+B)"><b>B</b></button>
               <button onmousedown="execFmt(event,'italic')" title="Italico (Ctrl+I)"><i>I</i></button>
@@ -633,7 +720,7 @@
       }
 
       if (state.sideTab === 'compare') {
-        let html = `<div class="commentary-ref">${book.namePt} ${state.chapter}:${state.selectedVerse}</div>`;
+        let html = pager;
         for (const t of DATA.translations) {
           const text = v.text[t] || '';
           if (text) {
@@ -759,10 +846,117 @@
     }
 
     function selectVerse(num) {
+      // Update in place instead of re-rendering the whole #app. Rebuilding #app
+      // recreates #bible-panel, which resets its scroll to the top (the "jump"
+      // bug). Here the bible panel is never replaced, so the reading position is
+      // preserved naturally and there is no flash.
       state.selectedVerse = num;
+      const wasClosed = !state.sidePanelOpen;
+      if (wasClosed) state.sidePanelOpen = true;
+      saveState();
+
+      const book = DATA.books[state.bookIdx];
+      const ch = book.chapters[state.chapter - 1];
+
+      // Re-highlight verses: the selected verse plus any sharing its commentary range.
+      const selVerse = ch?.verses[num - 1];
+      const activeRange = selVerse?.commentaryRange || null;
+      document.querySelectorAll('.verse-span').forEach(el => {
+        const vNum = parseInt(el.dataset.verse);
+        const v = ch?.verses[vNum - 1];
+        const isActive = vNum === num || (activeRange && v?.commentaryRange === activeRange);
+        el.classList.toggle('active', isActive);
+      });
+
+      // Refresh the side panel content (commentary / notes / compare).
+      const content = document.querySelector('.side-panel-content');
+      if (content) content.innerHTML = renderSidePanel(ch, book);
+      setupEditor();
+
+      // If the side panel was collapsed, open it without touching the bible panel.
+      if (wasClosed) {
+        const sp = document.getElementById('side-panel');
+        if (sp) {
+          sp.classList.remove('collapsed');
+          sp.style.width = state.sidePanelWidth + 'px';
+          if (!document.getElementById('resize-handle')) {
+            const handle = document.createElement('div');
+            handle.className = 'resize-handle';
+            handle.id = 'resize-handle';
+            sp.parentNode.insertBefore(handle, sp);
+            setupResize();
+          }
+        }
+      }
+    }
+
+    // Move the selection to the previous/next verse, crossing chapter boundaries.
+    function navigateVerse(delta) {
+      if (!state.selectedVerse) return;
+      const book = DATA.books[state.bookIdx];
+      const curLen = book.chapters[state.chapter - 1].verses.length;
+      const target = state.selectedVerse + delta;
+
+      if (target >= 1 && target <= curLen) {
+        selectVerse(target); // in place, preserves the reading position
+        return;
+      }
+      // Cross into the previous/next chapter.
+      if (target < 1 && state.chapter > 1) {
+        state.chapter -= 1;
+        state.selectedVerse = book.chapters[state.chapter - 1].verses.length;
+      } else if (target > curLen && state.chapter < book.chapters.length) {
+        state.chapter += 1;
+        state.selectedVerse = 1;
+      } else {
+        return; // start or end of the book
+      }
       if (!state.sidePanelOpen) state.sidePanelOpen = true;
+      state.notes = {};
       saveState();
       render();
+      loadNotes();
+      document.getElementById('bible-panel')?.scrollTo(0, 0);
+    }
+
+    // Bookmark: remember where I stopped reading (persisted with the rest of state).
+    function setBookmark() {
+      state.bookmark = {
+        bookIdx: state.bookIdx,
+        chapter: state.chapter,
+        verse: state.selectedVerse || null,
+      };
+      saveState();
+      render();
+      // Brief "saved" confirmation on the button.
+      const btn = document.querySelector('.bookmark-btn');
+      if (btn) {
+        const orig = btn.innerHTML;
+        btn.classList.add('saved');
+        btn.innerHTML = '✓ Marcado';
+        setTimeout(() => {
+          const b = document.querySelector('.bookmark-btn');
+          if (b) { b.classList.remove('saved'); b.innerHTML = orig; }
+        }, 1300);
+      }
+    }
+
+    async function goToBookmark() {
+      const bm = state.bookmark;
+      if (!bm || !DATA.books[bm.bookIdx]) return;
+      state.bookIdx = bm.bookIdx;
+      state.chapter = bm.chapter;
+      state.selectedVerse = bm.verse || null;
+      if (state.selectedVerse && !state.sidePanelOpen) state.sidePanelOpen = true;
+      state.notes = {};
+      saveState();
+      render();
+      await loadNotes(); // re-renders with this chapter's notes
+      if (state.selectedVerse) {
+        document.querySelector('.verse-span.active')?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      } else {
+        document.getElementById('bible-panel')?.scrollTo(0, 0);
+      }
     }
 
     function selectTranslation(t) {
@@ -806,11 +1000,10 @@
       else if (e.key === 'ArrowRight' && state.chapter < book.chapters.length) selectChapter(state.chapter + 1);
       else if (e.key === 'ArrowDown' && state.selectedVerse) {
         e.preventDefault();
-        const ch = book.chapters[state.chapter - 1];
-        if (state.selectedVerse < ch.verses.length) selectVerse(state.selectedVerse + 1);
-      } else if (e.key === 'ArrowUp' && state.selectedVerse && state.selectedVerse > 1) {
+        navigateVerse(1);
+      } else if (e.key === 'ArrowUp' && state.selectedVerse) {
         e.preventDefault();
-        selectVerse(state.selectedVerse - 1);
+        navigateVerse(-1);
       } else if (e.key === 'Escape') {
         state.selectedVerse = null;
         render();
