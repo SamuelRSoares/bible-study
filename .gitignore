@@ -22,3 +22,14 @@ public/data/
 
 # User notes (personal data, backup separately)
 notes/
+
+# Per-user study bible recipes (keep the README + the .example template tracked)
+commentaries/*.js
+!commentaries/*.example.js
+
+# Source PDFs (each person's own copyrighted material) — keep only the instructions
+source-pdfs/*
+!source-pdfs/README.txt
+
+# Parsed commentary outputs (derived from each person's own copyrighted material)
+*-commentary.json

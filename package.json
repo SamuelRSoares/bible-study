@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "setup": "node setup.js",
+    "start": "node server.js",
+    "bible": "node build-bible.js",
+    "extract": "node extract.js",
+    "commentary": "node build-commentary.js"
   },
   "keywords": [],
   "author": "",

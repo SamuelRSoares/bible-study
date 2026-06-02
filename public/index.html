@@ -75,6 +75,8 @@
 
     .nav-breadcrumb select:focus { border-color: var(--accent); }
 
+    .commentary-select { border-color: var(--accent-dim) !important; color: var(--mauve) !important; max-width: 220px; }
+
     .translation-tabs { display: flex; gap: 4px; }
 
     .translation-tab {
@@ -423,11 +425,12 @@
 
   <script>
     let DATA = null;
+    let CATALOG = { commentaries: [], default: null };
     let state = {
       bookIdx: 0, chapter: 1, translation: 'NAA',
       selectedVerse: null, sideTab: 'commentary',
       notes: {}, sidebarOpen: true, sidePanelOpen: true,
-      sidePanelWidth: 420, bookmark: null,
+      sidePanelWidth: 420, bookmark: null, commentaryId: null,
     };
 
     try {
@@ -441,10 +444,75 @@
     }
 
     async function init() {
-      const res = await fetch('/data/app-data.json');
+      const res = await fetch('/data/bible.json');
       DATA = await res.json();
+      DATA.introductions = {};
+      DATA.sectionHeaders = {};
+
+      try {
+        const catRes = await fetch('/data/catalog.json');
+        if (catRes.ok) CATALOG = await catRes.json();
+      } catch {}
+
+      // Pick the study bible: remembered choice if still available, else the
+      // catalog default, else the first one. May be null (no commentary installed).
+      const ids = CATALOG.commentaries.map(c => c.id);
+      if (!state.commentaryId || !ids.includes(state.commentaryId)) {
+        state.commentaryId = CATALOG.default && ids.includes(CATALOG.default)
+          ? CATALOG.default
+          : (ids[0] || null);
+      }
+      await loadCommentary(state.commentaryId);
+
       render();
       loadNotes();
+    }
+
+    // Load a study bible's commentary and merge it onto the verses in memory, so the
+    // rest of the app keeps reading v.commentary / v.commentaryRange / DATA.* as before.
+    async function loadCommentary(id) {
+      // Clear any previously merged commentary first (when switching study bibles).
+      DATA.introductions = {};
+      DATA.sectionHeaders = {};
+      for (const b of DATA.books) {
+        for (const ch of b.chapters) {
+          for (const v of ch.verses) { delete v.commentary; delete v.commentaryRange; }
+        }
+      }
+      state.commentaryId = id;
+      if (!id) return;
+
+      let comm;
+      try {
+        const res = await fetch(`/data/commentary-${id}.json`);
+        if (!res.ok) return;
+        comm = await res.json();
+      } catch { return; }
+
+      DATA.introductions = comm.introductions || {};
+      DATA.sectionHeaders = comm.sectionHeaders || {};
+      for (const b of DATA.books) {
+        const byChapter = comm.verses?.[b.id];
+        if (!byChapter) continue;
+        for (const ch of b.chapters) {
+          const cv = byChapter[String(ch.number)];
+          if (!cv) continue;
+          for (const v of ch.verses) {
+            const e = cv[v.number];
+            if (!e) continue;
+            if (e.c) v.commentary = e.c;
+            if (e.r) v.commentaryRange = e.r;
+          }
+        }
+      }
+    }
+
+    async function switchCommentary(id) {
+      if (id === state.commentaryId) return;
+      await loadCommentary(id);
+      state.selectedVerse = null;
+      saveState();
+      render();
     }
 
     async function loadNotes() {
@@ -533,6 +601,9 @@
             <select onchange="selectChapter(this.value)">
               ${book.chapters.map((_, i) => `<option value="${i + 1}" ${i + 1 === state.chapter ? 'selected' : ''}>Cap. ${i + 1}</option>`).join('')}
             </select>
+            ${CATALOG.commentaries.length > 1 ? `<select class="commentary-select" onchange="switchCommentary(this.value)" title="Bíblia de estudos">
+              ${CATALOG.commentaries.map(c => `<option value="${c.id}" ${c.id === state.commentaryId ? 'selected' : ''}>${c.name}</option>`).join('')}
+            </select>` : ''}
             ${DATA.introductions[bookName] ? `<button class="intro-btn" onclick="showIntro()">Intro</button>` : ''}
             <button class="bookmark-btn" onclick="setBookmark()" title="Marcar onde parei na leitura">\u{1F516} Marcar</button>
             ${bm ? `<button class="bookmark-go" onclick="goToBookmark()" title="Voltar para onde parei">↩ ${bmLabel}</button>` : ''}

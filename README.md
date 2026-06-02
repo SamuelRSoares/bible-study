@@ -28,29 +28,41 @@ Combina quatro traducoes da Biblia (NAA, NVI, ACF, KJV) com o comentario do **IV
 # Instalar dependencias
 npm install
 
-# Baixar as traducoes da Biblia
-mkdir -p bibles
-curl -L -o bibles/NAA.json "https://raw.githubusercontent.com/damarals/biblias/main/inst/json/NAA.json"
-curl -L -o bibles/NVI.json "https://raw.githubusercontent.com/damarals/biblias/main/inst/json/NVI.json"
-curl -L -o bibles/ACF.json "https://raw.githubusercontent.com/damarals/biblias/main/inst/json/ACF.json"
-curl -L -o bibles/KJV.json "https://raw.githubusercontent.com/thiagobodruk/bible/master/json/en_kjv.json"
+# Baixar as traducoes da Biblia (multiplataforma)
+node download-bibles.js
+
+# Montar o texto biblico (gera public/data/bible.json)
+node build-bible.js
 ```
 
-## Extracao dos comentarios
+Com isso o app ja funciona com o **texto biblico + suas anotacoes**. O comentario
+(a "biblia de estudos") e opcional e plugavel — veja a secao abaixo.
 
-Os scripts de extracao processam os PDFs do IVP Commentary e geram JSONs estruturados por livro/capitulo/versiculo. Edite os caminhos dos PDFs nos scripts conforme necessario.
+## Biblias de estudo (comentario)
+
+O texto biblico e o **comentario** sao camadas separadas. Cada pessoa pode plugar a
+propria biblia de estudos e alternar entre varias por um seletor no topo do app. O
+comentario nao vai no git (e material protegido) — cada um gera o seu localmente.
+
+Passo a passo completo (incluindo o formato/"contrato" de saida do parser):
+**[`commentaries/README.md`](commentaries/README.md)**.
+
+Resumo:
 
 ```bash
-# 1. Extrair texto dos PDFs (preservando negrito/italico)
+# 1. Extrair o texto do PDF preservando negrito/italico (ajuste o caminho no script)
 node extract-formatted.js
 
-# 2. Parsear o texto em estrutura por versiculo
-node parse-formatted.js     # NT
-node parse-ot-fmt.js         # AT
+# 2. Parsear no formato do contrato (adapte ao layout do seu PDF)
+node parse-formatted.js     # NT (base)
+node parse-ot-fmt.js         # AT (base)
 
-# 3. Montar o JSON unificado do app
-node prepare-data.js
+# 3. Registrar a biblia em commentaries/<id>.js e montar
+node build-commentary.js <id>
 ```
+
+A biblia escolhida fica salva no navegador; o catalogo (`public/data/catalog.json`)
+e regenerado automaticamente a cada `build-commentary`.
 
 ## Uso
 
@@ -67,16 +79,26 @@ As anotacoes sao salvas como arquivos na pasta `notes/` — faca backup desta pa
 ```
 bible-study/
   server.js              # Servidor HTTP + API de notas
+  books-meta.js          # Metadados dos 66 livros (compartilhado pelos builds)
+  download-bibles.js     # Baixa as 4 traducoes para bibles/
+  build-bible.js         # Gera public/data/bible.json (so o texto)
+  build-commentary.js    # Gera public/data/commentary-<id>.json + catalog.json
+  commentaries/
+    README.md             # Como adicionar sua propria biblia de estudos (contrato)
+    *.example.js          # Template de configuracao de uma biblia
+    <id>.js               # Sua config (ignorada pelo git)
   public/
     index.html            # Interface completa (HTML + CSS + JS)
     data/
-      app-data.json       # Dados unificados (gerado por prepare-data.js)
+      bible.json          # Texto biblico (gerado)
+      commentary-<id>.json # Comentario de cada biblia de estudos (gerado)
+      catalog.json        # Lista de biblias disponiveis (gerado)
   notes/                  # Anotacoes pessoais (salvas como HTML)
   bibles/                 # JSONs das traducoes (baixados)
   extract-formatted.js    # Extracao dos PDFs com formatacao
-  parse-formatted.js      # Parser do comentario NT
-  parse-ot-fmt.js         # Parser do comentario AT
-  prepare-data.js         # Unifica biblia + comentario em app-data.json
+  parse-formatted.js      # Parser do comentario NT (base, adaptavel)
+  parse-ot-fmt.js         # Parser do comentario AT (base, adaptavel)
+  prepare-data.js         # (DEPRECATED) antigo build unificado
 ```
 
 ## Fontes de dados

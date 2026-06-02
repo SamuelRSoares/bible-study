@@ -1,9 +1,5 @@
-// DEPRECATED — substituído por build-bible.js + build-commentary.js, que separam o
-// texto bíblico do comentário para que cada pessoa use a própria bíblia de estudos.
-// Mantido apenas como referência histórica. Não é mais usado pelo app.
-const fs = require('fs');
-
-// All Bible books: OT then NT
+// Shared book metadata (OT then NT), used by build-bible.js and build-commentary.js.
+// abbrevPt matches the Portuguese bibles (NAA/NVI/ACF); abbrevEn matches the KJV.
 const allBooks = [
   // OT
   { name: 'Genesis', abbrevPt: 'Gn', abbrevEn: 'gn', namePt: 'Gênesis' },
@@ -75,118 +71,9 @@ const allBooks = [
   { name: 'Revelation', abbrevPt: 'Ap', abbrevEn: 're', namePt: 'Apocalipse' },
 ];
 
-// Load Bibles
-function loadBible(path) {
-  const raw = fs.readFileSync(path, 'utf8').replace(/^\uFEFF/, '');
-  return JSON.parse(raw);
+// Stable id used as a folder/key everywhere (e.g. "1 Corinthians" -> "1-corinthians").
+function bookId(name) {
+  return name.toLowerCase().replace(/\s+/g, '-');
 }
 
-const bibles = {
-  NAA: loadBible('bibles/NAA.json'),
-  NVI: loadBible('bibles/NVI.json'),
-  ACF: loadBible('bibles/ACF.json'),
-  KJV: loadBible('bibles/KJV.json'),
-};
-
-// Load commentaries (OT + NT) - use formatted versions with <b>/<i> tags
-const commentaryNT = JSON.parse(fs.readFileSync('commentary-nt-fmt.json', 'utf8'));
-const commentaryOT = JSON.parse(fs.readFileSync('commentary-ot-fmt.json', 'utf8'));
-const commentary = { ...commentaryOT, ...commentaryNT };
-
-function findBook(bibleArr, abbrev) {
-  return bibleArr.find(b => b.abbrev.toLowerCase() === abbrev.toLowerCase());
-}
-
-const appData = {
-  books: [],
-  translations: ['NAA', 'NVI', 'ACF', 'KJV'],
-};
-
-for (const bk of allBooks) {
-  const bookData = {
-    id: bk.name.toLowerCase().replace(/\s+/g, '-'),
-    name: bk.name,
-    namePt: bk.namePt,
-    chapters: [],
-  };
-
-  const naaBook = findBook(bibles.NAA, bk.abbrevPt);
-  if (!naaBook) {
-    console.log(`WARNING: ${bk.namePt} (${bk.abbrevPt}) not found in NAA`);
-    continue;
-  }
-
-  const chapterCount = naaBook.chapters.length;
-
-  for (let ch = 0; ch < chapterCount; ch++) {
-    const chNum = ch + 1;
-    const chapterData = { number: chNum, verses: [] };
-    const naaVerses = naaBook.chapters[ch];
-
-    for (let v = 0; v < naaVerses.length; v++) {
-      const vNum = v + 1;
-      const verseRef = `${chNum}:${vNum}`;
-      const verse = { number: vNum, text: {}, commentary: null };
-
-      for (const [name, bible] of Object.entries(bibles)) {
-        const abbrev = name === 'KJV' ? bk.abbrevEn : bk.abbrevPt;
-        const book = findBook(bible, abbrev);
-        if (book && book.chapters[ch] && book.chapters[ch][v]) {
-          verse.text[name] = book.chapters[ch][v];
-        }
-      }
-
-      const comm = commentary[bk.name];
-      if (comm && comm.verses) {
-        const chStr = String(chNum);
-        if (comm.verses[chStr]) {
-          if (comm.verses[chStr][verseRef]) {
-            verse.commentary = comm.verses[chStr][verseRef];
-          } else {
-            for (const [ref, text] of Object.entries(comm.verses[chStr])) {
-              const rangeMatch = ref.match(/^(\d+):(\d+)-(\d+)$/);
-              if (rangeMatch) {
-                const refCh = parseInt(rangeMatch[1]);
-                const refStart = parseInt(rangeMatch[2]);
-                const refEnd = parseInt(rangeMatch[3]);
-                if (refCh === chNum && vNum >= refStart && vNum <= refEnd) {
-                  if (vNum === refStart) {
-                    verse.commentary = text;
-                    verse.commentaryRange = ref;
-                  } else {
-                    verse.commentaryRange = ref;
-                  }
-                  break;
-                }
-              }
-            }
-          }
-        }
-      }
-
-      chapterData.verses.push(verse);
-    }
-
-    bookData.chapters.push(chapterData);
-  }
-
-  appData.books.push(bookData);
-  console.log(`${bk.namePt}: ${chapterCount} caps`);
-}
-
-// Section headers and introductions from both commentaries
-const sectionHeaders = {};
-const introductions = {};
-for (const bk of allBooks) {
-  const comm = commentary[bk.name];
-  if (comm?.sectionHeaders) sectionHeaders[bk.name] = comm.sectionHeaders;
-  if (comm?.introduction) introductions[bk.name] = comm.introduction;
-}
-appData.sectionHeaders = sectionHeaders;
-appData.introductions = introductions;
-
-fs.mkdirSync('public/data', { recursive: true });
-fs.writeFileSync('public/data/app-data.json', JSON.stringify(appData));
-const sizeMB = (fs.statSync('public/data/app-data.json').size / 1024 / 1024).toFixed(2);
-console.log(`\nSaved app-data.json (${sizeMB} MB)`);
-console.log(`Books: ${appData.books.length}`);
+module.exports = { allBooks, bookId };
