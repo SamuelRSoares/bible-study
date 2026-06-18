@@ -12,7 +12,7 @@
 //      referencias cruzadas e sao descartados.
 //   4) segmentacao por reinicio de capitulo, guiada pelas contagens de bible.json.
 const fs = require('fs');
-const { allBooks } = require('./books-meta');
+const { allBooks } = require('../books-meta');
 
 const rawFile = process.argv[2] || 'raw-text-biblia-shedd.json';
 const outFile = process.argv[3] || 'shedd-commentary.json';

@@ -14,13 +14,13 @@ PDF  ──(1) extrair──>  raw-text.json  ──(2) parsear──>  commenta
 
 ## 1. Extrair o texto do PDF
 
-Use `extract-formatted.js` como base (ele detecta automaticamente as fontes de
+Use `scripts/extract-formatted.js` como base (ele detecta automaticamente as fontes de
 negrito/itálico). Aponte o caminho do seu PDF e gere um `raw-text-*.json`.
 
 ## 2. Parsear no formato do contrato
 
 Esta é a parte que varia por bíblia, porque cada PDF marca versículos, seções e
-introduções de um jeito. Use `parse-formatted.js` / `parse-ot-fmt.js` como ponto de
+introduções de um jeito. Use `scripts/parse-formatted.js` / `scripts/parse-ot-fmt.js` como ponto de
 partida. **A única exigência é que a SAÍDA siga o contrato abaixo.**
 
 ### O contrato (formato de saída)
@@ -66,7 +66,7 @@ Regras:
    (os arquivos JSON que você gerou na etapa 2).
 2. Rode:
    ```bash
-   node build-bible.js              # uma vez (gera o texto bíblico)
+   node build-bible.js              # uma vez, gera o texto bíblico
    node build-commentary.js <id>    # gera public/data/commentary-<id>.json + catalog
    node server.js
    ```

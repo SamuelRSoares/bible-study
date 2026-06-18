@@ -10,7 +10,7 @@
 // Saída (contrato — detalhes em commentaries/README.md):
 //   { "Genesis": { introduction, sectionHeaders, verses: { "1": { "1:1": "..." } } }, ... }
 const fs = require('fs');
-const { allBooks } = require('./books-meta');
+const { allBooks } = require('../books-meta');
 
 const rawFile = process.argv[2] || 'raw-text.json';
 const outFile = process.argv[3] || 'commentary.json';

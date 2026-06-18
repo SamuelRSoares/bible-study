@@ -1,68 +1,68 @@
 # Bible Study
 
-Aplicacao web para estudo biblico que centraliza o texto da Biblia, comentarios academicos e anotacoes pessoais em uma unica interface.
+Aplicação web para estudo bíblico que centraliza o texto da Bíblia, comentários acadêmicos e anotações pessoais em uma única interface.
 
-Combina quatro traducoes da Biblia (NAA, NVI, ACF, KJV) com o comentario do **IVP Bible Background Commentary** (Craig Keener para o NT, John Walton/Victor Matthews para o AT), preservando a formatacao original do PDF (negrito e italico).
+Combina quatro traduções da Bíblia (NAA, NVI, ACF, KJV) com o comentário do **IVP Bible Background Commentary** (Craig Keener para o NT, John Walton/Victor Matthews para o AT), preservando a formatação original do PDF (negrito e itálico).
 
 ## Funcionalidades
 
 - **66 livros** — Antigo e Novo Testamento completos
-- **4 traducoes** — NAA, NVI, ACF e KJV, com aba de comparacao lado a lado
-- **Comentario academico** — extraido dos PDFs do IVP Commentary com formatacao (negrito/italico)
-- **Anotacoes pessoais** — editor rich text (negrito, italico, titulos, listas, citacoes) com salvamento automatico
-- **Introducoes por livro** — contexto historico e autoral de cada livro biblico
-- **Texto corrido** — versiculos exibidos como texto fluido, com destaque ao passar o mouse
-- **Painel lateral redimensionavel** — arraste a borda para ajustar o tamanho
-- **Navegacao por teclado** — setas esq/dir para capitulos, cima/baixo para versiculos
+- **4 traduções** — NAA, NVI, ACF e KJV, com aba de comparação lado a lado
+- **Comentário acadêmico** — extraído dos PDFs do IVP Commentary com formatação (negrito/itálico)
+- **Anotações pessoais** — editor rich text (negrito, itálico, títulos, listas, citações) com salvamento automático
+- **Introduções por livro** — contexto histórico e autoral de cada livro bíblico
+- **Texto corrido** — versículos exibidos como texto fluido, com destaque ao passar o mouse
+- **Painel lateral redimensionável** — arraste a borda para ajustar o tamanho
+- **Navegação por teclado** — setas esq/dir para capítulos, cima/baixo para versículos
 - **Responsivo** — funciona em desktop e celular
-- **Tema claro** — fundo creme suave com destaques em roxo/lavanda
+- **Tema claro e escuro** — claro (creme, inspirado no Catppuccin Latte) e escuro (Catppuccin Mocha); botão 🌙/☀️ no cabeçalho
 
-## Pre-requisitos
+## Pré-requisitos
 
 - [Node.js](https://nodejs.org/) v18+
-- Os PDFs do IVP Bible Background Commentary (NT e OT) para a etapa de extracao
+- Os PDFs do IVP Bible Background Commentary (NT e OT) para a etapa de extração
 
-## Instalacao
+## Instalação
 
 ```bash
-# Instalar dependencias
+# Instalar dependências
 npm install
 
-# Baixar as traducoes da Biblia (multiplataforma)
+# Baixar as traduções da Bíblia (multiplataforma)
 node download-bibles.js
 
-# Montar o texto biblico (gera public/data/bible.json)
+# Montar o texto bíblico (gera public/data/bible.json)
 node build-bible.js
 ```
 
-Com isso o app ja funciona com o **texto biblico + suas anotacoes**. O comentario
-(a "biblia de estudos") e opcional e plugavel — veja a secao abaixo.
+Com isso o app já funciona com o **texto bíblico + suas anotações**. O comentário
+(a "bíblia de estudos") é opcional e plugável — veja a seção abaixo.
 
-## Biblias de estudo (comentario)
+## Bíblias de estudo (comentário)
 
-O texto biblico e o **comentario** sao camadas separadas. Cada pessoa pode plugar a
-propria biblia de estudos e alternar entre varias por um seletor no topo do app. O
-comentario nao vai no git (e material protegido) — cada um gera o seu localmente.
+O texto bíblico e o **comentário** são camadas separadas. Cada pessoa pode plugar a
+própria bíblia de estudos e alternar entre várias por um seletor no topo do app. O
+comentário não vai no git (é material protegido) — cada um gera o seu localmente.
 
-Passo a passo completo (incluindo o formato/"contrato" de saida do parser):
+Passo a passo completo (incluindo o formato/"contrato" de saída do parser):
 **[`commentaries/README.md`](commentaries/README.md)**.
 
 Resumo:
 
 ```bash
-# 1. Extrair o texto do PDF preservando negrito/italico (ajuste o caminho no script)
-node extract-formatted.js
+# 1. Extrair o texto do PDF preservando negrito/itálico (ajuste o caminho no script)
+node scripts/extract.js
 
 # 2. Parsear no formato do contrato (adapte ao layout do seu PDF)
-node parse-formatted.js     # NT (base)
-node parse-ot-fmt.js         # AT (base)
+node scripts/parse-formatted.js     # NT (base)
+node scripts/parse-ot-fmt.js        # AT (base)
 
-# 3. Registrar a biblia em commentaries/<id>.js e montar
+# 3. Registrar a bíblia em commentaries/<id>.js e montar
 node build-commentary.js <id>
 ```
 
-A biblia escolhida fica salva no navegador; o catalogo (`public/data/catalog.json`)
-e regenerado automaticamente a cada `build-commentary`.
+A bíblia escolhida fica salva no navegador; o catálogo (`public/data/catalog.json`)
+é regenerado automaticamente a cada `build-commentary`.
 
 ## Uso
 
@@ -72,7 +72,7 @@ node server.js
 
 Acesse **http://localhost:3000** no navegador.
 
-As anotacoes sao salvas como arquivos na pasta `notes/` — faca backup desta pasta para nao perder seus dados.
+As anotações são salvas como arquivos na pasta `notes/` — faça backup desta pasta para não perder seus dados.
 
 ## Estrutura do projeto
 
@@ -80,30 +80,39 @@ As anotacoes sao salvas como arquivos na pasta `notes/` — faca backup desta pa
 bible-study/
   server.js              # Servidor HTTP + API de notas
   books-meta.js          # Metadados dos 66 livros (compartilhado pelos builds)
-  download-bibles.js     # Baixa as 4 traducoes para bibles/
-  build-bible.js         # Gera public/data/bible.json (so o texto)
+  download-bibles.js     # Baixa as 4 traduções para bibles/
+  build-bible.js         # Gera public/data/bible.json (só o texto)
   build-commentary.js    # Gera public/data/commentary-<id>.json + catalog.json
+  setup.js               # Instalação guiada (chamado pelo INSTALAR.bat)
+  scripts/
+    extract.js            # Extração básica de PDF
+    extract-formatted.js  # Extração com detecção automática de negrito/itálico
+    extract-full.js       # Extração completa NT
+    extract-full-ot.js    # Extração completa AT
+    parse-formatted.js    # Parser do comentário NT (base, adaptável)
+    parse-ot-fmt.js       # Parser do comentário AT (base, adaptável)
+    parse-shedd.js        # Parser específico da Bíblia de Estudo Shedd
+    parse.example.js      # Template de parser para novas bíblias
+    merge-formatting.js   # Utilitário de merge de formatação
+    check-fonts*.js       # Utilitários de diagnóstico de fontes
   commentaries/
-    README.md             # Como adicionar sua propria biblia de estudos (contrato)
-    *.example.js          # Template de configuracao de uma biblia
+    README.md             # Como adicionar sua própria bíblia de estudos (contrato)
+    *.example.js          # Template de configuração de uma bíblia
     <id>.js               # Sua config (ignorada pelo git)
   public/
     index.html            # Interface completa (HTML + CSS + JS)
     data/
-      bible.json          # Texto biblico (gerado)
-      commentary-<id>.json # Comentario de cada biblia de estudos (gerado)
-      catalog.json        # Lista de biblias disponiveis (gerado)
-  notes/                  # Anotacoes pessoais (salvas como HTML)
-  bibles/                 # JSONs das traducoes (baixados)
-  extract-formatted.js    # Extracao dos PDFs com formatacao
-  parse-formatted.js      # Parser do comentario NT (base, adaptavel)
-  parse-ot-fmt.js         # Parser do comentario AT (base, adaptavel)
-  prepare-data.js         # (DEPRECATED) antigo build unificado
+      bible.json          # Texto bíblico (gerado)
+      commentary-<id>.json # Comentário de cada bíblia de estudos (gerado)
+      catalog.json        # Lista de bíblias disponíveis (gerado)
+  notes/                  # Anotações pessoais (salvas como HTML)
+  bibles/                 # JSONs das traduções (baixados)
+  source-pdfs/            # Coloque aqui os PDFs para extração
 ```
 
 ## Fontes de dados
 
-- **Traducoes em portugues (NAA, NVI, ACF):** [damarals/biblias](https://github.com/damarals/biblias)
+- **Traduções em português (NAA, NVI, ACF):** [damarals/biblias](https://github.com/damarals/biblias)
 - **KJV:** [thiagobodruk/bible](https://github.com/thiagobodruk/bible)
-- **Comentario NT:** *The IVP Bible Background Commentary: New Testament* — Craig S. Keener (2nd ed., 2014)
-- **Comentario AT:** *The IVP Bible Background Commentary: Old Testament* — John H. Walton, Victor H. Matthews, Mark W. Chavalas (2000)
+- **Comentário NT:** *The IVP Bible Background Commentary: New Testament* — Craig S. Keener (2nd ed., 2014)
+- **Comentário AT:** *The IVP Bible Background Commentary: Old Testament* — John H. Walton, Victor H. Matthews, Mark W. Chavalas (2000)

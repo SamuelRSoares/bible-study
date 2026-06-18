@@ -28,12 +28,44 @@
       --radius: 8px;
       --sidebar-bg: #eae7e1;
       --panel-bg: #f0ede8;
+      --section-bg: rgba(123, 94, 167, 0.06);
+      --overlay-bg: rgba(0, 0, 0, 0.3);
+      --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+      --font-reading: 'Untitled Serif', 'Georgia', 'Times New Roman', serif;
+      --font-size-base: 16px;
+      --reading-color: inherit;
+    }
+
+    html[data-theme="dark"] {
+      --bg-primary: #1e1e2e;
+      --bg-secondary: #181825;
+      --bg-surface: #313244;
+      --bg-hover: #45475a;
+      --bg-active: #585b70;
+      --text-primary: #cdd6f4;
+      --text-secondary: #bac2de;
+      --text-muted: #6c7086;
+      --accent: #cba6f7;
+      --accent-light: #b4befe;
+      --accent-dim: rgba(203, 166, 247, 0.25);
+      --accent-glow: rgba(203, 166, 247, 0.1);
+      --border: #313244;
+      --yellow: #f9e2af;
+      --green: #a6e3a1;
+      --red: #f38ba8;
+      --peach: #fab387;
+      --mauve: #cba6f7;
+      --scrollbar: #45475a;
+      --sidebar-bg: #181825;
+      --panel-bg: #1e1e2e;
+      --section-bg: rgba(203, 166, 247, 0.08);
+      --overlay-bg: rgba(0, 0, 0, 0.6);
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+      font-family: var(--font-body);
       background: var(--bg-primary);
       color: var(--text-primary);
       height: 100vh;
@@ -47,81 +79,107 @@
 
     .app { display: flex; height: 100vh; flex-direction: column; }
 
-    /* Header */
+    /* Header wrapper — transitions for auto-hide */
+    .header-wrap {
+      flex-shrink: 0;
+      overflow: hidden;
+      max-height: 120px;
+      transition: max-height 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .header-wrap.hidden { max-height: 0; }
+
     .header {
-      display: flex;
-      align-items: center;
-      padding: 8px 16px;
+      display: flex; flex-direction: column;
       background: var(--bg-secondary);
       border-bottom: 1px solid var(--border);
-      gap: 10px;
-      flex-shrink: 0;
     }
 
-    .header h1 { font-size: 15px; font-weight: 700; color: var(--accent); white-space: nowrap; letter-spacing: -0.3px; }
-
-    .nav-breadcrumb {
-      display: flex; align-items: center; gap: 6px; font-size: 13px;
-      color: var(--text-secondary); flex: 1; min-width: 0;
+    .hrow {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 16px;
     }
+    .hrow-util { border-bottom: 1px solid var(--border); padding: 7px 16px; }
+    .hrow-nav  { padding: 6px 16px; }
 
-    .nav-breadcrumb span { color: var(--text-muted); }
-
-    .nav-breadcrumb select {
-      background: var(--bg-surface); color: var(--text-primary);
-      border: 1px solid var(--border); border-radius: 4px;
-      padding: 4px 8px; font-size: 13px; cursor: pointer; outline: none;
+    .app-title {
+      font-size: 14px; font-weight: 700; color: var(--accent);
+      letter-spacing: -0.3px; white-space: nowrap;
     }
+    .hrow-spacer { flex: 1; }
 
-    .nav-breadcrumb select:focus { border-color: var(--accent); }
-
-    .commentary-select { border-color: var(--accent-dim) !important; color: var(--mauve) !important; max-width: 220px; }
-
-    .translation-tabs { display: flex; gap: 4px; }
-
-    .translation-tab {
-      padding: 4px 10px; font-size: 11px; font-weight: 600; border-radius: 4px;
-      cursor: pointer; background: transparent; color: var(--text-muted);
-      border: 1px solid transparent; transition: all 0.15s;
-    }
-
-    .translation-tab:hover { color: var(--text-secondary); background: var(--bg-hover); }
-    .translation-tab.active { color: var(--accent); background: var(--accent-glow); border-color: var(--accent-dim); }
-
-    .main { display: flex; flex: 1; overflow: hidden; }
-
-    /* Toggle buttons */
-    .toggle-btn {
+    /* Circular icon buttons */
+    .icon-btn {
       background: transparent; border: 1px solid var(--border); color: var(--text-muted);
-      padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 13px;
+      width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      width: 28px; height: 28px; flex-shrink: 0;
+      font-size: 14px; flex-shrink: 0; transition: all 0.15s;
     }
+    .icon-btn:hover { color: var(--text-secondary); background: var(--bg-hover); }
 
-    .toggle-btn:hover { color: var(--text-secondary); background: var(--bg-hover); }
+    /* Nav row 3-column layout */
+    .hnav-left  { display: flex; gap: 6px; align-items: center; flex: 1; }
+    .hnav-mid   { display: flex; align-items: center; gap: 6px; justify-content: center; }
+    .hnav-right { display: flex; align-items: center; justify-content: flex-end; flex: 1; gap: 6px; }
 
-    .intro-btn {
-      background: transparent; border: 1px solid var(--accent-dim); color: var(--mauve);
-      padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;
+    /* Nav selects — borderless, minimal */
+    .nav-sel {
+      background: transparent; color: var(--text-primary);
+      border: none; border-bottom: 1px solid transparent;
+      padding: 3px 4px; font-size: 13px; cursor: pointer;
+      outline: none; font-family: inherit;
+      transition: border-color 0.15s;
     }
+    .nav-sel:hover { border-bottom-color: var(--border); }
+    .nav-sel:focus { border-bottom-color: var(--accent); }
+    .nav-sep { color: var(--text-muted); font-size: 13px; user-select: none; }
 
-    .intro-btn:hover { background: var(--accent-glow); }
-
-    .bookmark-btn, .bookmark-go {
-      background: transparent; border: 1px solid var(--border); color: var(--text-secondary);
-      padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;
-      white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;
+    /* Pill buttons */
+    .pill-btn {
+      padding: 4px 12px; font-size: 12px; font-weight: 600;
+      border-radius: 20px; cursor: pointer;
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text-secondary); transition: all 0.15s;
+      white-space: nowrap; font-family: inherit;
     }
+    .pill-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .pill-btn.active { background: var(--accent-glow); color: var(--accent); border-color: var(--accent-dim); }
 
-    .bookmark-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .pill-mauve { border-color: var(--accent-dim); color: var(--mauve); }
+    .pill-mauve:hover { background: var(--accent-glow); }
+
+    .pill-sm {
+      padding: 3px 10px; font-size: 11px; font-weight: 600;
+      border-radius: 20px; cursor: pointer;
+      background: transparent; border: 1px solid var(--accent-dim);
+      color: var(--mauve); transition: all 0.15s;
+      white-space: nowrap; font-family: inherit;
+    }
+    .pill-sm:hover { background: var(--accent-glow); }
+
+    /* Floating translation/commentary picker */
+    .transl-menu {
+      position: fixed; z-index: 1000;
+      background: var(--bg-surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 6px; min-width: 160px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15); display: none; flex-direction: column; gap: 2px;
+    }
+    .transl-menu.open { display: flex; }
+    .transl-item {
+      padding: 7px 14px; font-size: 13px; cursor: pointer;
+      color: var(--text-secondary); border-radius: 6px; transition: all 0.1s;
+    }
+    .transl-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .transl-item.active { background: var(--accent-glow); color: var(--accent); font-weight: 600; }
 
     .bookmark-go {
-      border-color: var(--accent-dim); color: var(--accent);
+      background: transparent; border: 1px solid var(--accent-dim); color: var(--mauve);
+      padding: 3px 10px; border-radius: 20px; cursor: pointer; font-size: 11px; font-weight: 600;
+      white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;
+      transition: all 0.15s; font-family: inherit;
     }
-
     .bookmark-go:hover { background: var(--accent-glow); }
 
-    .bookmark-btn.saved { border-color: var(--green); color: var(--green); }
+    .main { display: flex; flex: 1; overflow: hidden; }
 
     /* Sidebar */
     .sidebar {
@@ -158,6 +216,7 @@
     .chapter-title {
       font-size: 26px; font-weight: 300; color: var(--accent);
       margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid var(--border);
+      text-align: center;
     }
 
     .chapter-title span { color: var(--text-muted); font-weight: 400; }
@@ -165,7 +224,7 @@
     /* Flowing text - verses inline */
     .section-header {
       margin: 22px 0 10px; padding: 8px 12px;
-      background: rgba(123, 94, 167, 0.06);
+      background: var(--section-bg);
       border-left: 3px solid var(--mauve); border-radius: 0 4px 4px 0;
       display: block;
     }
@@ -188,7 +247,8 @@
     .section-header .section-intro i { color: var(--mauve); font-style: italic; }
 
     .verse-flow {
-      line-height: 1.9; font-size: 16px; color: var(--text-primary);
+      line-height: 1.9; font-size: var(--font-size-base); color: var(--reading-color, var(--text-primary));
+      font-family: var(--font-reading);
     }
 
     .verse-span {
@@ -238,15 +298,37 @@
     .side-tab {
       padding: 5px 14px; font-size: 12px; font-weight: 600; cursor: pointer;
       background: transparent; color: var(--text-muted); border: none;
-      border-radius: 4px; transition: all 0.15s;
+      border-radius: 4px; transition: all 0.15s; position: relative;
     }
 
     .side-tab:hover { color: var(--text-secondary); background: var(--bg-hover); }
     .side-tab.active { color: var(--accent); background: var(--accent-glow); }
+    .side-tab.has-indicator::after {
+      content: ''; position: absolute; top: 3px; right: 3px;
+      width: 6px; height: 6px; border-radius: 50%; background: var(--accent); opacity: 0.85;
+    }
+
+    .commentary-actions { display: flex; justify-content: flex-end; margin-bottom: 4px; }
+    .copy-btn {
+      font-size: 11px; padding: 3px 10px; border-radius: 4px; cursor: pointer;
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text-muted); transition: all 0.15s;
+    }
+    .copy-btn:hover { color: var(--text-primary); background: var(--bg-hover); }
+
+    .copy-toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+      background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border);
+      padding: 7px 18px; border-radius: 8px; font-size: 13px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.35); z-index: 9999; pointer-events: none;
+      animation: toast-in 0.15s ease, toast-out 0.3s ease 1.1s forwards;
+    }
+    @keyframes toast-in { from { opacity:0; transform:translateX(-50%) translateY(6px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+    @keyframes toast-out { from { opacity:1; } to { opacity:0; } }
 
     .side-panel-content { flex: 1; overflow-y: auto; padding: 16px; }
 
-    .commentary-text { font-size: 14px; line-height: 1.8; color: var(--text-secondary); }
+    .commentary-text { font-size: 14px; line-height: 1.8; color: var(--text-secondary); font-family: var(--font-reading); }
     .commentary-text b { color: var(--text-primary); font-weight: 600; }
     .commentary-text i { color: var(--mauve); font-style: italic; }
 
@@ -316,7 +398,7 @@
       background: transparent; color: var(--text-primary);
       border: none; border-radius: 0;
       padding: 0; font-size: 15px; line-height: 1.8;
-      font-family: inherit; outline: none; overflow-y: auto;
+      font-family: var(--font-reading); outline: none; overflow-y: auto;
     }
 
     .note-editor:empty::before {
@@ -344,7 +426,7 @@
 
     /* Intro modal */
     .intro-overlay {
-      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3);
+      display: none; position: fixed; inset: 0; background: var(--overlay-bg);
       z-index: 100; justify-content: center; align-items: center;
     }
 
@@ -400,23 +482,115 @@
       .side-panel.collapsed { width: 0 !important; box-shadow: none; }
       .resize-handle { display: none; }
       .bible-panel { padding: 16px; }
-      .translation-tabs { display: none; }
-      .header { padding: 8px 12px; }
-
-      .mobile-translations {
-        display: flex; gap: 4px; padding: 8px 16px;
-        background: var(--bg-secondary); border-bottom: 1px solid var(--border);
-        overflow-x: auto;
-      }
+      .hrow-util { padding: 6px 12px; }
+      .hrow-nav  { padding: 5px 12px; }
+      .hnav-mid  { flex: 0 1 auto; }
 
       .chapter-title { font-size: 18px; }
       .verse-flow { font-size: 15px; }
     }
 
-    @media (min-width: 769px) {
-      .mobile-translations { display: none; }
+    /* Context menu */
+    .ctx-menu {
+      position: fixed; z-index: 1000;
+      background: var(--bg-surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 4px 0; min-width: 200px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.18); user-select: none;
     }
+    .ctx-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 14px; font-size: 13px; cursor: pointer;
+      color: var(--text-secondary); white-space: nowrap;
+    }
+    .ctx-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .ctx-sep { height: 1px; background: var(--border); margin: 3px 0; }
+    .ctx-sublabel {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; color: var(--text-muted); padding: 6px 14px 2px;
+    }
+    .ctx-colors { display: flex; gap: 8px; padding: 5px 14px 10px; }
+    .ctx-color {
+      width: 20px; height: 20px; border-radius: 50%; cursor: pointer;
+      border: 2px solid transparent; transition: transform 0.12s;
+    }
+    .ctx-color:hover { transform: scale(1.25); }
+    .ctx-color.active { border-color: var(--text-primary) !important; box-shadow: 0 0 0 1px var(--bg-surface); }
+
+    /* Verse highlights */
+    .verse-span.hl-yellow { background: rgba(255, 210, 0, 0.22) !important; border-radius: 3px; }
+    .verse-span.hl-green  { background: rgba(60, 190, 100, 0.22) !important; border-radius: 3px; }
+    .verse-span.hl-blue   { background: rgba(80, 140, 255, 0.22) !important; border-radius: 3px; }
+    .verse-span.hl-pink   { background: rgba(245, 80, 140, 0.22) !important; border-radius: 3px; }
+    .verse-span.hl-yellow:hover, .verse-span.hl-yellow.active { background: rgba(255, 210, 0, 0.4) !important; }
+    .verse-span.hl-green:hover,  .verse-span.hl-green.active  { background: rgba(60, 190, 100, 0.4) !important; }
+    .verse-span.hl-blue:hover,   .verse-span.hl-blue.active   { background: rgba(80, 140, 255, 0.4) !important; }
+    .verse-span.hl-pink:hover,   .verse-span.hl-pink.active   { background: rgba(245, 80, 140, 0.4) !important; }
+
+    /* Settings FAB */
+    .settings-fab {
+      position: fixed; bottom: 24px; right: 24px; z-index: 500;
+      width: 42px; height: 42px; border-radius: 50%;
+      background: var(--accent); color: #fff;
+      border: none; cursor: pointer; font-size: 19px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.22); transition: background 0.15s, transform 0.25s;
+    }
+    .settings-fab:hover { background: var(--accent-light); }
+    .settings-fab.open { transform: rotate(45deg); }
+    .settings-panel {
+      position: fixed; bottom: 76px; right: 24px; z-index: 499;
+      background: var(--bg-surface); border: 1px solid var(--border);
+      border-radius: 12px; width: 264px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+      display: none; overflow: hidden;
+    }
+    .settings-panel.open { display: block; }
+    .settings-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 11px 16px; border-bottom: 1px solid var(--border);
+    }
+    .settings-head span { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+    .settings-head button { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 15px; padding: 0; }
+    .settings-body { padding: 12px 16px; display: flex; flex-direction: column; gap: 13px; }
+    .settings-lbl {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.6px; color: var(--accent); margin-bottom: 5px; display: block;
+    }
+    .settings-opts { display: flex; gap: 5px; flex-wrap: wrap; }
+    .settings-opt {
+      padding: 4px 10px; font-size: 12px; border-radius: 4px; cursor: pointer;
+      background: transparent; border: 1px solid var(--border); color: var(--text-secondary);
+      transition: all 0.12s; font-family: inherit;
+    }
+    .settings-opt:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .settings-opt.active { background: var(--accent-glow); color: var(--accent); border-color: var(--accent-dim); }
+    .settings-colors { display: flex; gap: 10px; align-items: center; }
+    .settings-cdot {
+      width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+      border: 2px solid transparent; transition: transform 0.12s;
+    }
+    .settings-cdot:hover { transform: scale(1.15); }
+    .settings-cdot.active { border-color: var(--text-primary) !important; box-shadow: 0 0 0 1px var(--bg-surface); }
+
+    /* Commentary selection highlight popup */
+    .sel-popup {
+      position: fixed; z-index: 600;
+      background: var(--bg-surface); border: 1px solid var(--border);
+      border-radius: 6px; padding: 5px 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+      display: none; align-items: center; gap: 8px; font-size: 12px;
+      color: var(--text-secondary);
+    }
+    .sel-popup.visible { display: flex; }
+    .sel-popup-lbl { user-select: none; font-weight: 600; white-space: nowrap; }
+    .sel-popup-colors { display: flex; gap: 5px; }
+    .sel-popup-c {
+      width: 16px; height: 16px; border-radius: 50%; cursor: pointer;
+      border: 2px solid transparent; transition: transform 0.12s;
+    }
+    .sel-popup-c:hover { transform: scale(1.2); }
   </style>
+  <script>if (localStorage.getItem('dark-mode') === 'true') document.documentElement.setAttribute('data-theme', 'dark');</script>
 </head>
 <body>
   <div id="app" class="app">
@@ -437,6 +611,69 @@
       const saved = JSON.parse(localStorage.getItem('bible-study-state'));
       if (saved) Object.assign(state, saved);
     } catch {}
+
+    let darkMode = localStorage.getItem('dark-mode') === 'true';
+    function applyTheme() {
+      document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+    }
+    function toggleDarkMode() {
+      darkMode = !darkMode;
+      localStorage.setItem('dark-mode', darkMode);
+      applyTheme();
+      const btn = document.getElementById('dark-mode-btn');
+      if (btn) btn.textContent = darkMode ? '☀️' : '🌙';
+    }
+    applyTheme();
+
+    // ---- Highlights ----
+    const HL_COLORS = ['#ffd700','#3ebe6a','#5090ff','#f5508c',''];
+    const HL_NAMES  = ['hl-yellow','hl-green','hl-blue','hl-pink',''];
+    let highlights = {};
+    try { highlights = JSON.parse(localStorage.getItem('bible-highlights') || '{}'); } catch {}
+    function saveHighlights() { localStorage.setItem('bible-highlights', JSON.stringify(highlights)); }
+    function hlKey(bookId, chapter, verse) { return `${bookId}:${chapter}:${verse}`; }
+    function setHighlight(vNum, colorIdx) {
+      const book = DATA.books[state.bookIdx];
+      const key = hlKey(book.id, state.chapter, vNum);
+      if (colorIdx === 4 || colorIdx === -1) {
+        delete highlights[key];
+      } else {
+        highlights[key] = colorIdx;
+      }
+      saveHighlights();
+      // update in-place
+      const el = document.querySelector(`.verse-span[data-verse="${vNum}"]`);
+      if (el) {
+        HL_NAMES.forEach(n => n && el.classList.remove(n));
+        if (colorIdx !== 4 && colorIdx !== -1) el.classList.add(HL_NAMES[colorIdx]);
+      }
+    }
+
+    // ---- Settings ----
+    const FONT_MAP = {
+      'untitled': "'Untitled Serif', 'Georgia', 'Times New Roman', serif",
+      'georgia': "'Georgia', 'Times New Roman', serif",
+      'system':  "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif",
+      'mono':    "'JetBrains Mono', 'Fira Code', 'Menlo', monospace",
+    };
+    const FONT_SIZE_MAP = { 'small': '14px', 'normal': '16px', 'large': '19px', 'xlarge': '22px' };
+    const READING_COLORS = [
+      { label: 'Padrão', value: '' },
+      { label: 'Quente', value: '#2c1a0e' },
+      { label: 'Neutro', value: '#1a1a1a' },
+      { label: 'Azul', value: '#0d2035' },
+    ];
+    let settings = { font: 'untitled', fontSize: 'normal', readingColor: 0 };
+    try { Object.assign(settings, JSON.parse(localStorage.getItem('bible-settings') || '{}')); } catch {}
+    function saveSettings() { localStorage.setItem('bible-settings', JSON.stringify(settings)); }
+    function applySettings() {
+      const root = document.documentElement;
+      root.style.setProperty('--font-reading', FONT_MAP[settings.font] || FONT_MAP.untitled);
+      root.style.setProperty('--font-size-base', FONT_SIZE_MAP[settings.fontSize] || '16px');
+      const rc = READING_COLORS[settings.readingColor] || READING_COLORS[0];
+      root.style.setProperty('--reading-color', rc.value || '');
+    }
+    applySettings();
 
     function saveState() {
       const { notes, ...rest } = state;
@@ -522,7 +759,61 @@
         const res = await fetch(`/api/notes/${book.id}/${state.chapter}`);
         state.notes = await res.json();
       } catch { state.notes = {}; }
-      render();
+      // Update verse indicator dots in-place — evita chamar render() e perder o scroll
+      const ch = book.chapters[state.chapter - 1];
+      document.querySelectorAll('.verse-span').forEach(el => {
+        const vNum = parseInt(el.dataset.verse);
+        const v = ch?.verses[vNum - 1];
+        const hasComm = v?.commentary || v?.commentaryRange;
+        const hasNote = !!(state.notes[vNum] || '').trim();
+        el.classList.remove('has-both', 'has-note', 'has-commentary');
+        if (hasComm && hasNote) el.classList.add('has-both');
+        else if (hasNote) el.classList.add('has-note');
+        else if (hasComm) el.classList.add('has-commentary');
+      });
+      updateTabIndicators();
+    }
+
+    function showToast(msg) {
+      document.querySelectorAll('.copy-toast').forEach(t => t.remove());
+      const t = document.createElement('div');
+      t.className = 'copy-toast';
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 1500);
+    }
+
+    function copyVerse(e, vNum) {
+      e?.preventDefault();
+      const book = DATA.books[state.bookIdx];
+      const ch = book.chapters[state.chapter - 1];
+      const v = ch.verses[vNum - 1];
+      if (!v) return;
+      const text = (v.text[state.translation] || v.text['NAA'] || '').replace(/\s+/g, ' ').trim();
+      const ref = `${book.namePt} ${state.chapter}:${vNum}`;
+      navigator.clipboard.writeText(`"${text}" — ${ref} (${state.translation})`)
+        .then(() => showToast('Versículo copiado'));
+    }
+
+    function copyCommentary() {
+      const el = document.getElementById('commentary-text');
+      if (!el) return;
+      const book = DATA.books[state.bookIdx];
+      const ref = `${book.namePt} ${state.chapter}:${state.selectedVerse}`;
+      const text = el.innerText.replace(/\s+/g, ' ').trim();
+      navigator.clipboard.writeText(`${ref}\n\n${text}`)
+        .then(() => showToast('Comentário copiado'));
+    }
+
+    function updateTabIndicators() {
+      const hasComm = !!(state.selectedVerse && getCommentary(state.chapter, state.selectedVerse));
+      const hasNote = !!(state.selectedVerse && (state.notes[state.selectedVerse] || '').trim());
+      document.querySelectorAll('.side-tab').forEach(btn => {
+        const m = btn.getAttribute('onclick').match(/setSideTab\('(\w+)'\)/);
+        if (!m) return;
+        if (m[1] === 'commentary') btn.classList.toggle('has-indicator', hasComm);
+        if (m[1] === 'notes') btn.classList.toggle('has-indicator', hasNote);
+      });
     }
 
     let saveTimer = null;
@@ -534,6 +825,19 @@
         if (!editor) return;
         const content = editor.innerHTML;
         state.notes[verse] = content;
+        // Atualiza o indicador do versículo em tempo real
+        const ch_ = book.chapters[state.chapter - 1];
+        const v_ = ch_?.verses[verse - 1];
+        const hasComm_ = v_?.commentary || v_?.commentaryRange;
+        const hasNote_ = !!(content || '').trim();
+        const vEl = document.querySelector(`.verse-span[data-verse="${verse}"]`);
+        if (vEl) {
+          vEl.classList.remove('has-both', 'has-note', 'has-commentary');
+          if (hasComm_ && hasNote_) vEl.classList.add('has-both');
+          else if (hasNote_) vEl.classList.add('has-note');
+          else if (hasComm_) vEl.classList.add('has-commentary');
+        }
+        updateTabIndicators();
         await fetch(`/api/notes/${book.id}/${state.chapter}/${verse}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -585,36 +889,43 @@
       const groups = getBookGroups();
       const panelW = state.sidePanelOpen ? state.sidePanelWidth : 0;
       const bm = state.bookmark;
+      const hasCommIndicator = !!(state.selectedVerse && getCommentary(state.chapter, state.selectedVerse));
+      const hasNoteIndicator = !!(state.selectedVerse && (state.notes[state.selectedVerse] || '').trim());
       const bmLabel = bm && DATA.books[bm.bookIdx]
         ? `${DATA.books[bm.bookIdx].namePt} ${bm.chapter}${bm.verse ? ':' + bm.verse : ''}`
         : '';
 
       document.getElementById('app').innerHTML = `
-        <div class="header">
-          <button class="toggle-btn" onclick="toggleSidebar()" title="Menu lateral">\u2630</button>
-          <h1>Bible Study</h1>
-          <div class="nav-breadcrumb">
-            <select onchange="selectBook(this.value)">
-              ${DATA.books.map((b, i) => `<option value="${i}" ${i === state.bookIdx ? 'selected' : ''}>${b.namePt}</option>`).join('')}
-            </select>
-            <span>/</span>
-            <select onchange="selectChapter(this.value)">
-              ${book.chapters.map((_, i) => `<option value="${i + 1}" ${i + 1 === state.chapter ? 'selected' : ''}>Cap. ${i + 1}</option>`).join('')}
-            </select>
-            ${CATALOG.commentaries.length > 1 ? `<select class="commentary-select" onchange="switchCommentary(this.value)" title="Bíblia de estudos">
-              ${CATALOG.commentaries.map(c => `<option value="${c.id}" ${c.id === state.commentaryId ? 'selected' : ''}>${c.name}</option>`).join('')}
-            </select>` : ''}
-            ${DATA.introductions[bookName] ? `<button class="intro-btn" onclick="showIntro()">Intro</button>` : ''}
-            <button class="bookmark-btn" onclick="setBookmark()" title="Marcar onde parei na leitura">\u{1F516} Marcar</button>
-            ${bm ? `<button class="bookmark-go" onclick="goToBookmark()" title="Voltar para onde parei">↩ ${bmLabel}</button>` : ''}
+        <div class="header-wrap" id="header-wrap">
+          <div class="header">
+            <div class="hrow hrow-util">
+              <button class="icon-btn" onclick="toggleSidebar()" title="Menu lateral">☰</button>
+              <span class="app-title">Bible Study</span>
+              <div class="hrow-spacer"></div>
+              <button class="icon-btn" onclick="toggleDarkMode()" id="dark-mode-btn" title="Tema">${darkMode ? '☀️' : '🌙'}</button>
+              <button class="icon-btn" onclick="toggleSettings()" title="Configurações">&#9881;</button>
+              <button class="icon-btn" onclick="toggleSidePanel()" title="Painel lateral">◨</button>
+            </div>
+            <div class="hrow hrow-nav">
+              <div class="hnav-left">
+                <button class="pill-btn" id="translation-btn" onclick="showTranslMenu(this)" title="Tradução">${state.translation} ▾</button>
+                ${CATALOG.commentaries.length > 0 ? `<button class="pill-btn pill-mauve" id="commentary-btn" onclick="showCommMenu(this)" title="Bíblia de estudos">${(CATALOG.commentaries.find(c=>c.id===state.commentaryId)?.name||'Comentário').split(' ').slice(0,2).join(' ')} ▾</button>` : ''}
+              </div>
+              <div class="hnav-mid">
+                <select class="nav-sel" onchange="selectBook(this.value)">
+                  ${DATA.books.map((b, i) => `<option value="${i}" ${i === state.bookIdx ? 'selected' : ''}>${b.namePt}</option>`).join('')}
+                </select>
+                <span class="nav-sep">/</span>
+                <select class="nav-sel" onchange="selectChapter(this.value)">
+                  ${book.chapters.map((_, i) => `<option value="${i + 1}" ${i + 1 === state.chapter ? 'selected' : ''}>Cap. ${i + 1}</option>`).join('')}
+                </select>
+                ${DATA.introductions[bookName] ? `<button class="pill-sm" onclick="showIntro()">Intro</button>` : ''}
+              </div>
+              <div class="hnav-right">
+                ${bm ? `<button class="bookmark-go" onclick="goToBookmark()" title="Ir para o marcador">↩ ${bmLabel}</button>` : ''}
+              </div>
+            </div>
           </div>
-          <div class="translation-tabs">
-            ${DATA.translations.map(t => `<button class="translation-tab ${state.translation === t ? 'active' : ''}" onclick="selectTranslation('${t}')">${t}</button>`).join('')}
-          </div>
-          <button class="toggle-btn" onclick="toggleSidePanel()" title="Painel lateral">\u25E8</button>
-        </div>
-        <div class="mobile-translations">
-          ${DATA.translations.map(t => `<button class="translation-tab ${state.translation === t ? 'active' : ''}" onclick="selectTranslation('${t}')">${t}</button>`).join('')}
         </div>
         <div class="main">
           <div class="sidebar ${state.sidebarOpen ? '' : 'collapsed'}" id="sidebar">
@@ -644,8 +955,8 @@
             <div class="side-panel ${state.sidePanelOpen ? '' : 'collapsed'}" style="width:${panelW}px" id="side-panel">
               <div class="side-panel-header">
                 <div class="side-panel-tabs">
-                  <button class="side-tab ${state.sideTab === 'commentary' ? 'active' : ''}" onclick="setSideTab('commentary')">Comentario</button>
-                  <button class="side-tab ${state.sideTab === 'notes' ? 'active' : ''}" onclick="setSideTab('notes')">Notas</button>
+                  <button class="side-tab ${state.sideTab === 'commentary' ? 'active' : ''} ${hasCommIndicator ? 'has-indicator' : ''}" onclick="setSideTab('commentary')">Comentario</button>
+                  <button class="side-tab ${state.sideTab === 'notes' ? 'active' : ''} ${hasNoteIndicator ? 'has-indicator' : ''}" onclick="setSideTab('notes')">Notas</button>
                   <button class="side-tab ${state.sideTab === 'compare' ? 'active' : ''}" onclick="setSideTab('compare')">Comparar</button>
                 </div>
               </div>
@@ -656,6 +967,14 @@
           </div>
         </div>
         ${renderIntroOverlay(bookName)}
+        <button class="settings-fab" id="settings-fab" onclick="toggleSettings()" title="Configurações">⚙</button>
+        <div class="settings-panel" id="settings-panel">
+          <div class="settings-head">
+            <span>Configurações</span>
+            <button onclick="toggleSettings()">✕</button>
+          </div>
+          <div class="settings-body" id="settings-body"></div>
+        </div>
       `;
 
       setupResize();
@@ -669,6 +988,7 @@
     function renderVerses(ch, bookName) {
       if (!ch) return '<p class="no-commentary">Capitulo nao encontrado.</p>';
 
+      const book = DATA.books[state.bookIdx];
       const sections = DATA.sectionHeaders[bookName]?.[state.chapter] || {};
       // Map: verse number -> section header { ref, title, intro }
       // Values may be a plain string (OT) or { title, intro } (NT).
@@ -707,15 +1027,17 @@
         const isActive = state.selectedVerse === vNum ||
           (activeRange && v.commentaryRange === activeRange);
 
+        const hlIdx = highlights[hlKey(book.id, state.chapter, vNum)];
         let cls = 'verse-span';
         if (hasComm && hasNote) cls += ' has-both';
         else if (hasNote) cls += ' has-note';
         else if (hasComm) cls += ' has-commentary';
         if (isActive) cls += ' active';
+        if (hlIdx !== undefined && HL_NAMES[hlIdx]) cls += ' ' + HL_NAMES[hlIdx];
 
         const text = v.text[state.translation] || v.text['NAA'] || '';
 
-        html += `<span class="${cls}" onclick="selectVerse(${vNum})" data-verse="${vNum}"><span class="verse-num">${vNum}</span>${text} </span>`;
+        html += `<span class="${cls}" onclick="selectVerse(${vNum})" oncontextmenu="showCtxMenu(event,${vNum})" data-verse="${vNum}"><span class="verse-num">${vNum}</span>${text} </span>`;
       }
 
       html += '</div>';
@@ -746,7 +1068,11 @@
           const rangeNote = comm.ref && comm.ref !== `${state.chapter}:${state.selectedVerse}`
             ? `<div class="commentary-range-note">Comentario de ${book.namePt} ${comm.ref}</div>`
             : '';
-          return pager + rangeNote + `<div class="commentary-text">${comm.text}</div>`;
+          return pager + rangeNote + `
+            <div class="commentary-actions">
+              <button class="copy-btn" onclick="copyCommentary()">Copiar</button>
+            </div>
+            <div class="commentary-text" id="commentary-text">${comm.text}</div>`;
         }
         return pager + '<p class="no-commentary">Sem comentario disponivel para este versiculo.</p>';
       }
@@ -943,6 +1269,11 @@
       const content = document.querySelector('.side-panel-content');
       if (content) content.innerHTML = renderSidePanel(ch, book);
       setupEditor();
+      updateTabIndicators();
+
+      // Rola o versículo selecionado para a área visível sem tirar as mãos das setas
+      document.querySelector(`.verse-span[data-verse="${num}"]`)
+        ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 
       // If the side panel was collapsed, open it without touching the bible panel.
       if (wasClosed) {
@@ -987,7 +1318,8 @@
       saveState();
       render();
       loadNotes();
-      document.getElementById('bible-panel')?.scrollTo(0, 0);
+      document.querySelector(`.verse-span[data-verse="${state.selectedVerse}"]`)
+        ?.scrollIntoView({ block: 'nearest' });
     }
 
     // Bookmark: remember where I stopped reading (persisted with the rest of state).
@@ -998,18 +1330,24 @@
         verse: state.selectedVerse || null,
       };
       saveState();
-      render();
-      // Brief "saved" confirmation on the button.
-      const btn = document.querySelector('.bookmark-btn');
-      if (btn) {
-        const orig = btn.innerHTML;
-        btn.classList.add('saved');
-        btn.innerHTML = '✓ Marcado';
-        setTimeout(() => {
-          const b = document.querySelector('.bookmark-btn');
-          if (b) { b.classList.remove('saved'); b.innerHTML = orig; }
-        }, 1300);
+
+      // Update in-place — sem chamar render() para não resetar o scroll
+      const bm = state.bookmark;
+      const bmLabel = `${DATA.books[bm.bookIdx].namePt} ${bm.chapter}${bm.verse ? ':' + bm.verse : ''}`;
+      const rightArea = document.querySelector('.hnav-right');
+      if (rightArea) {
+        let goBtn = rightArea.querySelector('.bookmark-go');
+        if (!goBtn) {
+          goBtn = document.createElement('button');
+          goBtn.className = 'bookmark-go';
+          goBtn.onclick = goToBookmark;
+          rightArea.appendChild(goBtn);
+        }
+        goBtn.title = 'Ir para o marcador';
+        goBtn.innerHTML = `↩ ${bmLabel}`;
       }
+
+      showToast('🔖 Marcado');
     }
 
     async function goToBookmark() {
@@ -1038,7 +1376,16 @@
 
     function setSideTab(tab) {
       state.sideTab = tab;
-      render();
+      // Update tab active classes in-place — calling render() recriaria o #bible-panel e perderia o scroll
+      document.querySelectorAll('.side-tab').forEach(btn => {
+        const m = btn.getAttribute('onclick').match(/setSideTab\('(\w+)'\)/);
+        if (m) btn.classList.toggle('active', m[1] === tab);
+      });
+      const book = DATA.books[state.bookIdx];
+      const ch = book.chapters[state.chapter - 1];
+      const content = document.querySelector('.side-panel-content');
+      if (content) content.innerHTML = renderSidePanel(ch, book);
+      setupEditor();
     }
 
     function toggleSidebar() {
@@ -1080,6 +1427,227 @@
         render();
       }
     });
+
+    // ---- Context menu ----
+    let ctxVerse = null;
+    function showCtxMenu(e, vNum) {
+      e.preventDefault();
+      ctxVerse = vNum;
+      let menu = document.getElementById('ctx-menu');
+      if (!menu) {
+        menu = document.createElement('div');
+        menu.id = 'ctx-menu';
+        menu.className = 'ctx-menu';
+        document.body.appendChild(menu);
+      }
+      const book = DATA.books[state.bookIdx];
+      const key = hlKey(book.id, state.chapter, vNum);
+      const curHl = highlights[key];
+      const colorDots = HL_COLORS.map((c, i) => {
+        const isNone = i === 4;
+        const isActive = isNone ? curHl === undefined : curHl === i;
+        return `<div class="ctx-color${isActive ? ' active' : ''}" title="${isNone ? 'Remover' : ''}"
+          style="${isNone ? 'background:transparent;border:2px dashed var(--text-muted);' : `background:${c};`}"
+          onclick="setHighlight(${vNum},${i});hideCtxMenu()"></div>`;
+      }).join('');
+      menu.innerHTML = `
+        <div class="ctx-sublabel">Destacar</div>
+        <div class="ctx-colors">${colorDots}</div>
+        <div class="ctx-sep"></div>
+        <div class="ctx-item" onclick="copyVerse(event,${vNum});hideCtxMenu()">📋 Copiar versículo</div>
+        <div class="ctx-item" onclick="setBookmark();hideCtxMenu()">🔖 Marcar aqui</div>
+        ${state.bookmark ? `<div class="ctx-item" onclick="goToBookmark();hideCtxMenu()">↩ Ir para marcador</div>` : ''}
+      `;
+      const menuW = 210, menuH = 150;
+      const left = Math.min(e.clientX, window.innerWidth - menuW - 8);
+      const top  = Math.min(e.clientY, window.innerHeight - menuH - 8);
+      menu.style.left = left + 'px';
+      menu.style.top  = top  + 'px';
+      menu.style.display = 'block';
+      setTimeout(() => document.addEventListener('click', hideCtxMenu, { once: true }), 0);
+    }
+    function hideCtxMenu() {
+      const m = document.getElementById('ctx-menu');
+      if (m) m.style.display = 'none';
+    }
+
+    // ---- Commentary selection popup ----
+    let selPopupVerse = null;
+    let _selPopupReady = false;
+    function setupSelectionPopup() {
+      if (!_selPopupReady) {
+        _selPopupReady = true;
+        const popup = document.createElement('div');
+        popup.id = 'sel-popup';
+        popup.className = 'sel-popup';
+        popup.innerHTML = `<span class="sel-popup-lbl">Destacar</span>
+          <div class="sel-popup-colors">
+            ${HL_COLORS.slice(0,4).map((c,i)=>`<div class="sel-popup-c" style="background:${c}" onclick="selPopupHighlight(${i})"></div>`).join('')}
+            <div class="sel-popup-c" style="background:transparent;border:2px dashed var(--text-muted)" onclick="selPopupHighlight(4)" title="Remover"></div>
+          </div>`;
+        document.body.appendChild(popup);
+        document.addEventListener('mousedown', (e) => {
+          if (!popup.contains(e.target)) popup.classList.remove('visible');
+        }, true);
+      }
+      // Re-attach to the new .side-panel-content created by render()
+      const panel = document.querySelector('.side-panel-content');
+      if (!panel) return;
+      panel.addEventListener('mouseup', () => {
+        const popup = document.getElementById('sel-popup');
+        const sel = window.getSelection();
+        if (!sel || sel.isCollapsed || !sel.toString().trim()) {
+          popup?.classList.remove('visible');
+          return;
+        }
+        const range = sel.getRangeAt(0);
+        if (!panel.contains(range.commonAncestorContainer)) { popup?.classList.remove('visible'); return; }
+        selPopupVerse = state.selectedVerse;
+        const rect = range.getBoundingClientRect();
+        if (popup) {
+          popup.style.left = Math.min(rect.left, window.innerWidth - 220) + 'px';
+          popup.style.top  = Math.max(rect.top - 48, 8) + 'px';
+          popup.classList.add('visible');
+        }
+      });
+    }
+    function selPopupHighlight(colorIdx) {
+      if (selPopupVerse) setHighlight(selPopupVerse, colorIdx);
+      document.getElementById('sel-popup')?.classList.remove('visible');
+    }
+
+    // ---- Header auto-hide on scroll ----
+    let lastScrollTop = 0;
+    let _scrollPanel = null;
+    function setupHeaderScroll() {
+      const panel = document.getElementById('bible-panel');
+      if (!panel || panel === _scrollPanel) return;
+      _scrollPanel = panel;
+      panel.addEventListener('scroll', () => {
+        const st = panel.scrollTop;
+        const wrap = document.getElementById('header-wrap');
+        if (!wrap) return;
+        if (st > lastScrollTop && st > 60) {
+          wrap.classList.add('hidden');
+        } else {
+          wrap.classList.remove('hidden');
+        }
+        lastScrollTop = st;
+      }, { passive: true });
+    }
+
+    // ---- Settings panel ----
+    function toggleSettings() {
+      const panel = document.getElementById('settings-panel');
+      const fab = document.getElementById('settings-fab');
+      if (!panel) return;
+      const open = panel.classList.toggle('open');
+      fab?.classList.toggle('open', open);
+      if (open) renderSettingsPanel();
+    }
+    function renderSettingsPanel() {
+      const body = document.getElementById('settings-body');
+      if (!body) return;
+      const fontOpts = [
+        { k: 'untitled', l: 'Untitled Serif' },
+        { k: 'georgia',  l: 'Georgia' },
+        { k: 'system',   l: 'Sistema' },
+        { k: 'mono',     l: 'Mono' },
+      ];
+      const sizeOpts = [
+        { k: 'small', l: 'P' },
+        { k: 'normal', l: 'M' },
+        { k: 'large', l: 'G' },
+        { k: 'xlarge', l: 'XG' },
+      ];
+      const themeHtml = `<div>
+        <span class="settings-lbl">Tema</span>
+        <div class="settings-opts">
+          <button class="settings-opt${!darkMode ? ' active' : ''}" onclick="setTheme(false)">☀️ Claro</button>
+          <button class="settings-opt${darkMode ? ' active' : ''}" onclick="setTheme(true)">🌙 Escuro</button>
+        </div></div>`;
+      const fontHtml = `<div>
+        <span class="settings-lbl">Fonte</span>
+        <div class="settings-opts">${fontOpts.map(o=>`<button class="settings-opt${settings.font===o.k?' active':''}" onclick="setSetting('font','${o.k}')">${o.l}</button>`).join('')}</div></div>`;
+      const sizeHtml = `<div>
+        <span class="settings-lbl">Tamanho</span>
+        <div class="settings-opts">${sizeOpts.map(o=>`<button class="settings-opt${settings.fontSize===o.k?' active':''}" onclick="setSetting('fontSize','${o.k}')">${o.l}</button>`).join('')}</div></div>`;
+      const rcDots = READING_COLORS.map((rc, i) => {
+        const bg = rc.value || 'var(--text-primary)';
+        return `<div class="settings-cdot${settings.readingColor===i?' active':''}"
+          style="background:${bg}" title="${rc.label}"
+          onclick="setSetting('readingColor',${i})"></div>`;
+      }).join('');
+      const colorHtml = `<div>
+        <span class="settings-lbl">Cor do texto</span>
+        <div class="settings-colors">${rcDots}</div></div>`;
+      body.innerHTML = themeHtml + fontHtml + sizeHtml + colorHtml;
+    }
+    function setTheme(dark) {
+      darkMode = dark;
+      localStorage.setItem('dark-mode', dark);
+      applyTheme();
+      const btn = document.getElementById('dark-mode-btn');
+      if (btn) btn.textContent = dark ? '☀️' : '\u{1F319}';
+      renderSettingsPanel();
+    }
+    function setSetting(key, value) {
+      settings[key] = value;
+      saveSettings();
+      applySettings();
+      renderSettingsPanel();
+    }
+
+    // ---- Translation & commentary floating menus ----
+    function showTranslMenu(btn) {
+      let menu = document.getElementById('transl-menu');
+      if (!menu) {
+        menu = document.createElement('div');
+        menu.id = 'transl-menu';
+        menu.className = 'transl-menu';
+        document.body.appendChild(menu);
+        document.addEventListener('click', (e) => {
+          if (!menu.contains(e.target) && e.target.id !== 'translation-btn') menu.classList.remove('open');
+        });
+      }
+      menu.innerHTML = DATA.translations.map(t =>
+        `<div class="transl-item${state.translation === t ? ' active' : ''}" onclick="selectTranslation('${t}');document.getElementById('transl-menu').classList.remove('open')">${t}</div>`
+      ).join('');
+      const rect = btn.getBoundingClientRect();
+      menu.style.left = rect.left + 'px';
+      menu.style.top  = (rect.bottom + 4) + 'px';
+      menu.classList.toggle('open');
+    }
+
+    function showCommMenu(btn) {
+      let menu = document.getElementById('comm-menu');
+      if (!menu) {
+        menu = document.createElement('div');
+        menu.id = 'comm-menu';
+        menu.className = 'transl-menu';
+        document.body.appendChild(menu);
+        document.addEventListener('click', (e) => {
+          if (!menu.contains(e.target) && e.target.id !== 'commentary-btn') menu.classList.remove('open');
+        });
+      }
+      menu.innerHTML = CATALOG.commentaries.map(c =>
+        `<div class="transl-item${state.commentaryId === c.id ? ' active' : ''}" onclick="switchCommentary('${c.id}');document.getElementById('comm-menu').classList.remove('open')">${c.name}</div>`
+      ).join('');
+      const rect = btn.getBoundingClientRect();
+      menu.style.left = rect.left + 'px';
+      menu.style.top  = (rect.bottom + 4) + 'px';
+      menu.classList.toggle('open');
+    }
+
+    // ---- Hook into render() lifecycle ----
+    const _origRender = render;
+    render = function() {
+      _origRender();
+      lastScrollTop = 0;
+      _scrollPanel = null;
+      setupHeaderScroll();
+      setupSelectionPopup();
+    };
 
     init();
   </script>

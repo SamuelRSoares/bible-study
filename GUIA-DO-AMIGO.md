@@ -26,6 +26,9 @@ Dê **duplo-clique em `INICIAR.bat`**. O navegador abre em
 
 Para fechar, feche a janela preta. Para abrir de novo, é só o `INICIAR.bat`.
 
+> **Dica:** o botão 🌙/☀️ no cabeçalho alterna entre tema claro (creme) e escuro. A
+> preferência fica salva no navegador.
+
 ---
 
 ## 5. Adicionar a sua bíblia de estudos (ex.: Shedd)
@@ -37,19 +40,19 @@ seu computador (não vai pra lugar nenhum).
 
 2. **Extraia o texto** — no terminal, na pasta do projeto:
    ```
-   node extract.js
+   node scripts/extract.js
    ```
-   Isso gera um arquivo `raw-text-....json`.
+   Isso gera um arquivo `raw-text-*.json`.
 
 3. **Transforme em comentário.**
    - **Se a sua bíblia é a Bíblia de Estudo Shedd**, já existe um parser pronto:
      ```
-     node parse-shedd.js raw-text-biblia-shedd.json shedd-commentary.json
+     node scripts/parse-shedd.js raw-text-biblia-shedd.json shedd-commentary.json
      ```
    - **Para outra bíblia de estudos**, esta parte depende do formato do PDF. Use
-     `parse.example.js` como ponto de partida:
+     `scripts/parse.example.js` como ponto de partida:
      ```
-     node parse.example.js raw-text-suabiblia.json suabiblia-commentary.json
+     node scripts/parse.example.js raw-text-suabiblia.json suabiblia-commentary.json
      ```
      Confira se os versículos saíram certos. **Se não saírem, me chame** (Samuel) e me
      mande o arquivo `raw-text-...json` — eu ajusto o parser e te devolvo pronto.
@@ -71,5 +74,5 @@ seu computador (não vai pra lugar nenhum).
   dela de vez em quando.
 - **Posso usar sem comentário?** Sim — depois do passo 4 o app já funciona com texto
   + notas. O comentário é opcional.
-- **O PDF é escaneado (imagem)?** Aí o `extract.js` não acha texto. Me avise que a
+- **O PDF é escaneado (imagem)?** Aí o `scripts/extract.js` não acha texto. Me avise que a
   gente vê uma alternativa (OCR).
