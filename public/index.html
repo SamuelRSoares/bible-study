@@ -1243,6 +1243,19 @@
     }
 
     function selectVerse(num) {
+      // Clica no versículo já selecionado → deseleciona e fecha o painel lateral
+      if (state.selectedVerse === num) {
+        state.selectedVerse = null;
+        state.sidePanelOpen = false;
+        saveState();
+        document.querySelectorAll('.verse-span').forEach(el => el.classList.remove('active'));
+        const sp = document.getElementById('side-panel');
+        const rh = document.getElementById('resize-handle');
+        if (sp) { sp.classList.add('collapsed'); sp.style.width = '0'; }
+        if (rh) rh.remove();
+        return;
+      }
+
       // Update in place instead of re-rendering the whole #app. Rebuilding #app
       // recreates #bible-panel, which resets its scroll to the top (the "jump"
       // bug). Here the bible panel is never replaced, so the reading position is
