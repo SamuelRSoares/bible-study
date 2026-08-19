@@ -1467,8 +1467,8 @@
         <div class="ctx-sublabel">Destacar</div>
         <div class="ctx-colors">${colorDots}</div>
         <div class="ctx-sep"></div>
-        <div class="ctx-item" onclick="copyVerse(event,${vNum});hideCtxMenu()">📋 Copiar versículo</div>
-        <div class="ctx-item" onclick="setBookmark();hideCtxMenu()">🔖 Marcar aqui</div>
+        <div class="ctx-item" onclick="copyVerse(event,${vNum});hideCtxMenu()">📋 Copiar</div>
+        <div class="ctx-item" onclick="setBookmark();hideCtxMenu()">🔖 Marcar</div>
         ${state.bookmark ? `<div class="ctx-item" onclick="goToBookmark();hideCtxMenu()">↩ Ir para marcador</div>` : ''}
       `;
       const menuW = 210, menuH = 150;
