@@ -2,16 +2,20 @@
 
 Aplicação web para estudo bíblico que centraliza o texto da Bíblia, comentários acadêmicos e anotações pessoais em uma única interface.
 
-Combina quatro traduções da Bíblia (NAA, NVI, ACF, KJV) com o comentário do **IVP Bible Background Commentary** (Craig Keener para o NT, John Walton/Victor Matthews para o AT), preservando a formatação original do PDF (negrito e itálico).
+Combina quatro traduções da Bíblia (NAA, NVI, ACF, KJV) com comentários acadêmicos de **bíblias de estudo plugáveis** — cada pessoa gera localmente a sua a partir do próprio PDF. O projeto já traz parsers prontos para a **Bíblia de Estudo Shedd** e para o **IVP Bible Background Commentary** (Craig Keener para o NT, John Walton/Victor Matthews para o AT), preservando a formatação original do PDF (negrito e itálico).
 
 ## Funcionalidades
 
 - **66 livros** — Antigo e Novo Testamento completos
 - **4 traduções** — NAA, NVI, ACF e KJV, com aba de comparação lado a lado
-- **Comentário acadêmico** — extraído dos PDFs do IVP Commentary com formatação (negrito/itálico)
+- **Múltiplas bíblias de estudo (comentário)** — plugáveis, com seletor no topo para alternar entre elas; **IVP Bible Background Commentary** é a padrão, com Shedd também disponível
+- **Comentário acadêmico** — extraído dos PDFs com formatação preservada (negrito/itálico)
 - **Anotações pessoais** — editor rich text (negrito, itálico, títulos, listas, citações) com salvamento automático
 - **Introduções por livro** — contexto histórico e autoral de cada livro bíblico
 - **Texto corrido** — versículos exibidos como texto fluido, com destaque ao passar o mouse
+- **Grifos coloridos** — selecione um versículo ou um trecho de texto e destaque em 4 cores; menu de contexto (clique direito) para grifar, copiar ou marcar o versículo
+- **Marcador de leitura** — salve a posição atual e volte a ela com um clique
+- **Painel de configurações** — fonte (Untitled Serif, Georgia, sistema, mono), tamanho do texto e cor de fundo da leitura
 - **Painel lateral redimensionável** — arraste a borda para ajustar o tamanho
 - **Navegação por teclado** — setas esq/dir para capítulos, cima/baixo para versículos
 - **Responsivo** — funciona em desktop e celular
@@ -43,6 +47,12 @@ Com isso o app já funciona com o **texto bíblico + suas anotações**. O comen
 O texto bíblico e o **comentário** são camadas separadas. Cada pessoa pode plugar a
 própria bíblia de estudos e alternar entre várias por um seletor no topo do app. O
 comentário não vai no git (é material protegido) — cada um gera o seu localmente.
+
+Quando há mais de uma bíblia de estudos instalada, o **IVP Bible Background
+Commentary** é a que abre por padrão (o catálogo é regenerado a cada
+`build-commentary.js <id>`, e o `<id>` do último build vira o padrão — rode
+`node build-commentary.js ivp` por último para manter o IVP como default). Quem já
+escolheu outra pelo seletor continua vendo a própria escolha, salva no navegador.
 
 Passo a passo completo (incluindo o formato/"contrato" de saída do parser):
 **[`commentaries/README.md`](commentaries/README.md)**.
